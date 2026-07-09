@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\GenreController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,14 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 // 仮ルート
-Route::get('/', function () {
-    return view('welcome');
-})->name('books.index');
-
-Route::get('/books/{book}', function ($book) {
-    return "書籍詳細画面（仮実装）<br>Book ID: {$book}";
-})->name('books.show');
-
 // ランキング（仮）
 Route::get('/ranking', function () {
     return 'ランキング画面（仮実装）';
@@ -32,13 +25,16 @@ Route::get('/ranking', function () {
 Route::get('/favorites', function () {
     return 'お気に入り一覧（仮実装）';
 })->name('favorites.index');
-
-// 書籍登録（仮）
-Route::get('/books/create', function () {
-    return '書籍登録画面（仮実装）';
-})->name('books.create');
 // 仮ルートここまで
 
 Route::middleware('auth')->group(function () {
     Route::resource('genres', GenreController::class);
+    Route::resource('books', BookController::class)
+        ->except(['index', 'show']);
 });
+
+Route::get('/', [BookController::class, 'index'])->name('books.index');
+// Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
+Route::get('/books/{book}', function ($book) {
+    return "書籍詳細画面（仮実装）<br>Book ID: {$book}";
+})->name('books.show');

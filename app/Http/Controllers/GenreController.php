@@ -11,7 +11,7 @@ use Illuminate\View\View;
 class GenreController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * ジャンル一覧画面を表示
      */
     public function index(): View
     {
@@ -21,7 +21,7 @@ class GenreController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * ジャンル登録画面を表示
      */
     public function create(): View
     {
@@ -29,7 +29,7 @@ class GenreController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * ジャンルを登録
      */
     public function store(StoreGenreRequest $request): RedirectResponse
     {
@@ -40,7 +40,7 @@ class GenreController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * ジャンル詳細画面を表示
      */
     public function show(Genre $genre): View
     {
@@ -50,7 +50,7 @@ class GenreController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * ジャンル編集画面を表示
      */
     public function edit(Genre $genre): View
     {
@@ -58,7 +58,7 @@ class GenreController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * ジャンルを更新
      */
     public function update(UpdateGenreRequest $request, Genre $genre): RedirectResponse
     {
@@ -69,7 +69,7 @@ class GenreController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * ジャンルを削除
      */
     public function destroy(Genre $genre): RedirectResponse
     {
