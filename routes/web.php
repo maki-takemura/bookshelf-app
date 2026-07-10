@@ -3,6 +3,7 @@
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\RankingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReviewLikeController;
 use Illuminate\Support\Facades\Route;
@@ -18,11 +19,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// ランキング（仮）
-Route::get('/ranking', function () {
-    return 'ランキング画面（仮実装）';
-})->name('ranking.index');
-
 Route::middleware('auth')->group(function () {
     Route::resource('genres', GenreController::class);
     Route::resource('books', BookController::class)
@@ -37,3 +33,4 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/', [BookController::class, 'index'])->name('books.index');
 Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
+Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
