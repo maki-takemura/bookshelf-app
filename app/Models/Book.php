@@ -22,6 +22,10 @@ class Book extends Model
         'image_url',
     ];
 
+    protected $casts = [
+        'published_date' => 'date',
+    ];
+
     /**
      * 書籍を登録したユーザーとのリレーション
      */
@@ -52,5 +56,13 @@ class Book extends Model
     public function favoritedByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favorites');
+    }
+
+    /**
+     * 書籍に紐づいている読書計画とのリレーション
+     */
+    public function readingPlans(): HasMany
+    {
+        return $this->hasMany(ReadingPlan::class);
     }
 }
