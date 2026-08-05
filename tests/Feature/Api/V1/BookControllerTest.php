@@ -7,6 +7,7 @@ use App\Models\Genre;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class BookControllerTest extends TestCase
@@ -213,6 +214,8 @@ class BookControllerTest extends TestCase
             'genres' => $genres->pluck('id')->all(),
         ];
 
+        Sanctum::actingAs($user);
+
         $response = $this->postJson('/api/v1/books', $bookData);
 
         $response->assertCreated();
@@ -255,14 +258,17 @@ class BookControllerTest extends TestCase
 
     public function test_正しい情報で書籍情報の更新ができ、200が返る(): void
     {
+        $user = User::factory()->create();
         $oldGenre = Genre::factory()->create();
         $newGenres = Genre::factory()->count(2)->create();
-
         $book = Book::factory()->create([
+            'user_id' => $user->id,
             'title' => '更新前タイトル',
             'isbn' => '9781234567890',
         ]);
         $book->genres()->attach($oldGenre);
+
+        Sanctum::actingAs($user);
 
         $bookData = [
             'title' => '更新後タイトル',
@@ -320,6 +326,7 @@ class BookControllerTest extends TestCase
 
     public function test_存在しない_i_dの書籍情報を更新しようとすると404エラーになる(): void
     {
+        $user = User::factory()->create();
         $genre = Genre::factory()->create();
         $bookData = [
             'title' => '更新後タイトル',
@@ -331,6 +338,8 @@ class BookControllerTest extends TestCase
             'genres' => [$genre->id],
         ];
 
+        Sanctum::actingAs($user);
+
         $response = $this->putJson('/api/v1/books/999999', $bookData);
 
         $response->assertNotFound();
@@ -340,10 +349,14 @@ class BookControllerTest extends TestCase
     {
         $user = User::factory()->create();
         $genre = Genre::factory()->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $book->genres()->attach($genre);
         Review::factory()->create(['book_id' => $book->id]);
         $user->favoriteBooks()->attach($book);
+
+        Sanctum::actingAs($user);
 
         $response = $this->deleteJson('/api/v1/books/'.$book->id);
 
@@ -362,8 +375,107 @@ class BookControllerTest extends TestCase
 
     public function test_存在しない_i_dの書籍を削除しようとすると404エラーになる(): void
     {
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
         $response = $this->deleteJson('/api/v1/books/999999');
 
         $response->assertNotFound();
+    }
+
+    public function test_未認証ユーザーが書籍を登録しようとすると401が返る(): void
+    {
+        $genres = Genre::factory()->count(2)->create();
+
+        $bookData = [
+            'title' => 'テスト書籍',
+            'author' => '鈴木一郎',
+            'isbn' => '9781234567891',
+            'published_date' => '2000-01-01',
+            'description' => 'テストです',
+            'image_url' => 'https://placehold.co/200x300',
+            'genres' => $genres->pluck('id')->all(),
+        ];
+
+        $response = $this->postJson('/api/v1/books', $bookData);
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_未認証ユーザーが書籍を更新しようとすると401が返る(): void
+    {
+        $book = Book::factory()->create();
+        $genres = Genre::factory()->count(2)->create();
+
+        $bookData = [
+            'title' => '更新後の書籍',
+            'author' => '鈴木一郎',
+            'isbn' => '9781234567891',
+            'published_date' => '2000-01-01',
+            'description' => '更新後の説明です',
+            'image_url' => 'https://placehold.co/200x300',
+            'genres' => $genres->pluck('id')->all(),
+        ];
+
+        $response = $this->putJson('/api/v1/books/'.$book->id, $bookData);
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_他のユーザーが登録した書籍を更新しようとすると403が返る(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+        $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($otherUser);
+
+        $bookData = [
+            'title' => '更新後の書籍',
+            'author' => '鈴木一郎',
+            'isbn' => '9781234567891',
+            'published_date' => '2000-01-01',
+            'description' => '更新後の説明です',
+            'image_url' => 'https://placehold.co/200x300',
+            'genres' => $genres->pluck('id')->all(),
+        ];
+
+        $response = $this->putJson('/api/v1/books/'.$book->id, $bookData);
+
+        $response->assertForbidden()
+            ->assertExactJson([
+                'error' => 'この操作を実行する権限がありません。',
+            ]);
+    }
+
+    public function test_未認証ユーザーが書籍を削除しようとすると401が返る(): void
+    {
+        $book = Book::factory()->create();
+
+        $response = $this->deleteJson('/api/v1/books/'.$book->id);
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_他のユーザーが登録した書籍を削除しようとすると403が返る(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($otherUser);
+
+        $response = $this->deleteJson('/api/v1/books/'.$book->id);
+
+        $response->assertForbidden()
+            ->assertExactJson([
+                'error' => 'この操作を実行する権限がありません。',
+            ]);
     }
 }
