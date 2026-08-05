@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Genre;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class BookValidationTest extends TestCase
@@ -50,7 +51,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時タイトルが空だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -66,6 +70,8 @@ class BookValidationTest extends TestCase
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
         $title = str_repeat('あ', 255);
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -83,7 +89,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時タイトルが256文字だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -96,7 +105,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時著者が空だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -112,6 +124,8 @@ class BookValidationTest extends TestCase
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
         $author = str_repeat('あ', 255);
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -129,7 +143,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時著者が256文字だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -140,22 +157,31 @@ class BookValidationTest extends TestCase
         $response->assertJsonValidationErrors('author');
     }
 
-    public function test_登録時_isb_nが空だとバリデーションエラーになる(): void
+    public function test_登録時_isb_nが空でも書籍を登録できる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
             ['isbn' => '']
         ));
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors('isbn');
+        $response->assertCreated();
+        $this->assertDatabaseHas('books', [
+            'user_id' => $user->id,
+            'isbn' => null,
+        ]);
     }
 
     public function test_登録時_isb_nが12桁だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -168,7 +194,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時_isb_nが14桁だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -181,7 +210,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時既に使われている_isb_nは登録できない(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         Book::factory()->create([
             'isbn' => '9781234567891',
@@ -196,22 +228,31 @@ class BookValidationTest extends TestCase
         $response->assertJsonValidationErrors('isbn');
     }
 
-    public function test_登録時出版日が空だとバリデーションエラーになる(): void
+    public function test_登録時出版日が空でも書籍を登録できる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
             ['published_date' => '']
         ));
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors('published_date');
+        $response->assertCreated();
+        $this->assertDatabaseHas('books', [
+            'user_id' => $user->id,
+            'published_date' => null,
+        ]);
     }
 
     public function test_登録時出版日が無効な日付だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -225,6 +266,7 @@ class BookValidationTest extends TestCase
     public function test_登録時説明が空でも書籍を登録できる(): void
     {
         $user = User::factory()->create();
+        Sanctum::actingAs($user);
         $genres = Genre::factory()->count(2)->create();
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
@@ -246,6 +288,8 @@ class BookValidationTest extends TestCase
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
 
+        Sanctum::actingAs($user);
+
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
             ['image_url' => '']
@@ -262,7 +306,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時画像_ur_lが無効な形式だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -278,6 +325,8 @@ class BookValidationTest extends TestCase
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
         $imageUrl = $this->createUrl(255);
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -295,7 +344,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時画像_ur_lが256文字だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/books', $this->validBookData(
             $genres->pluck('id')->all(),
@@ -308,6 +360,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時ジャンルが選択されていないとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
         $response = $this->postJson(
             '/api/v1/books',
             $this->validBookData([], ['genres' => ''])
@@ -319,6 +375,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時ジャンルが配列でないとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
         $response = $this->postJson(
             '/api/v1/books',
             $this->validBookData([], ['genres' => 1])
@@ -330,6 +390,10 @@ class BookValidationTest extends TestCase
 
     public function test_登録時存在しないジャンルを選択するとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
         $response = $this->postJson(
             '/api/v1/books',
             $this->validBookData([], ['genres' => [999999]])
@@ -341,8 +405,13 @@ class BookValidationTest extends TestCase
 
     public function test_更新時タイトルが空だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -358,9 +427,14 @@ class BookValidationTest extends TestCase
 
     public function test_更新時タイトルが255文字だと書籍を更新できる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $title = str_repeat('あ', 255);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -381,8 +455,13 @@ class BookValidationTest extends TestCase
 
     public function test_更新時タイトルが256文字だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -398,8 +477,13 @@ class BookValidationTest extends TestCase
 
     public function test_更新時著者が空だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -415,9 +499,14 @@ class BookValidationTest extends TestCase
 
     public function test_更新時著者が255文字だと書籍を更新できる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $author = str_repeat('あ', 255);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -438,8 +527,13 @@ class BookValidationTest extends TestCase
 
     public function test_更新時著者が256文字だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -453,26 +547,40 @@ class BookValidationTest extends TestCase
         $response->assertJsonValidationErrors('author');
     }
 
-    public function test_更新時_isb_nが空だとバリデーションエラーになる(): void
+    public function test_更新時_isb_nが空でも書籍を更新できる(): void
     {
+        $user = User::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
-            $this->validBookData($genres->pluck('id')->all(), [
-                'isbn' => '',
-            ])
+            $this->validBookData(
+                $genres->pluck('id')->all(),
+                ['isbn' => '']
+            )
         );
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors('isbn');
+        $response->assertOk();
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'isbn' => null,
+        ]);
     }
 
     public function test_更新時_isb_nが12桁だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -487,8 +595,13 @@ class BookValidationTest extends TestCase
 
     public function test_更新時_isb_nが14桁だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -503,6 +616,7 @@ class BookValidationTest extends TestCase
 
     public function test_更新時更新対象以外に既に使われている_isb_nには更新できない(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
 
         Book::factory()->create([
@@ -510,8 +624,11 @@ class BookValidationTest extends TestCase
         ]);
 
         $book = Book::factory()->create([
+            'user_id' => $user->id,
             'isbn' => '9781234567891',
         ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -524,27 +641,40 @@ class BookValidationTest extends TestCase
         $response->assertJsonValidationErrors('isbn');
     }
 
-    public function test_更新時出版日が空だとバリデーションエラーになる(): void
+    public function test_更新時出版日が空でも書籍を更新できる(): void
     {
+        $user = User::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
-            $this->validBookData($genres->pluck('id')->all(), [
-                'isbn' => $book->isbn,
-                'published_date' => '',
-            ])
+            $this->validBookData(
+                $genres->pluck('id')->all(),
+                ['published_date' => '']
+            )
         );
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors('published_date');
+        $response->assertOk();
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'published_date' => null,
+        ]);
     }
 
     public function test_更新時出版日が無効な日付だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -560,11 +690,14 @@ class BookValidationTest extends TestCase
 
     public function test_更新時説明が空でも書籍を更新できる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-
         $book = Book::factory()->create([
+            'user_id' => $user->id,
             'description' => '更新前の説明です。',
         ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -586,11 +719,14 @@ class BookValidationTest extends TestCase
 
     public function test_更新時画像_ur_lが空でも書籍を更新できる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-
         $book = Book::factory()->create([
+            'user_id' => $user->id,
             'image_url' => 'https://example.com/before.jpg',
         ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -612,8 +748,13 @@ class BookValidationTest extends TestCase
 
     public function test_更新時画像_ur_lが無効な形式だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -629,9 +770,14 @@ class BookValidationTest extends TestCase
 
     public function test_更新時画像_ur_lが255文字だと書籍を更新できる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $imageUrl = $this->createUrl(255);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -652,8 +798,13 @@ class BookValidationTest extends TestCase
 
     public function test_更新時画像_ur_lが256文字だとバリデーションエラーになる(): void
     {
+        $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
-        $book = Book::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -669,7 +820,12 @@ class BookValidationTest extends TestCase
 
     public function test_更新時ジャンルが選択されていないとバリデーションエラーになる(): void
     {
-        $book = Book::factory()->create();
+        $user = User::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -685,7 +841,12 @@ class BookValidationTest extends TestCase
 
     public function test_更新時ジャンルが配列でないとバリデーションエラーになる(): void
     {
-        $book = Book::factory()->create();
+        $user = User::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
@@ -701,7 +862,12 @@ class BookValidationTest extends TestCase
 
     public function test_更新時存在しないジャンルを選択するとバリデーションエラーになる(): void
     {
-        $book = Book::factory()->create();
+        $user = User::factory()->create();
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        Sanctum::actingAs($user);
 
         $response = $this->putJson(
             '/api/v1/books/'.$book->id,
