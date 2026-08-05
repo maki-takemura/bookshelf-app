@@ -14,11 +14,10 @@ class BookSeeder extends Seeder
      */
     public function run(): void
     {
-        $userId = User::first()->id;
+        $users = User::all();
 
         $items = [
             [
-                'user_id' => $userId,
                 'title' => '吾輩は猫である',
                 'author' => '夏目漱石',
                 'isbn' => '9784101010014',
@@ -28,7 +27,6 @@ class BookSeeder extends Seeder
                 'genres' => ['小説'],
             ],
             [
-                'user_id' => $userId,
                 'title' => '人を動かす',
                 'author' => 'D・カーネギー',
                 'isbn' => '9784422100524',
@@ -38,7 +36,6 @@ class BookSeeder extends Seeder
                 'genres' => ['ビジネス', '自己啓発'],
             ],
             [
-                'user_id' => $userId,
                 'title' => 'リーダブルコード',
                 'author' => 'Dustin Boswell',
                 'isbn' => '9784873115658',
@@ -48,7 +45,6 @@ class BookSeeder extends Seeder
                 'genres' => ['技術書'],
             ],
             [
-                'user_id' => $userId,
                 'title' => '7つの習慣',
                 'author' => 'スティーブン・R・コヴィー',
                 'isbn' => '9784863940246',
@@ -58,7 +54,6 @@ class BookSeeder extends Seeder
                 'genres' => ['ビジネス', '自己啓発'],
             ],
             [
-                'user_id' => $userId,
                 'title' => '坊っちゃん',
                 'author' => '夏目漱石',
                 'isbn' => '9784101010021',
@@ -68,7 +63,6 @@ class BookSeeder extends Seeder
                 'genres' => ['小説'],
             ],
             [
-                'user_id' => $userId,
                 'title' => 'サピエンス全史',
                 'author' => 'ユヴァル・ノア・ハラリ',
                 'isbn' => '9784309226712',
@@ -78,7 +72,6 @@ class BookSeeder extends Seeder
                 'genres' => ['歴史', '科学'],
             ],
             [
-                'user_id' => $userId,
                 'title' => 'Clean Code',
                 'author' => 'Robert C. Martin',
                 'isbn' => '9784048930598',
@@ -88,7 +81,6 @@ class BookSeeder extends Seeder
                 'genres' => ['技術書'],
             ],
             [
-                'user_id' => $userId,
                 'title' => '嫌われる勇気',
                 'author' => '岸見一郎・古賀史健',
                 'isbn' => '9784478025819',
@@ -98,7 +90,6 @@ class BookSeeder extends Seeder
                 'genres' => ['自己啓発'],
             ],
             [
-                'user_id' => $userId,
                 'title' => '火花',
                 'author' => '又吉直樹',
                 'isbn' => '9784163902302',
@@ -108,7 +99,6 @@ class BookSeeder extends Seeder
                 'genres' => ['小説'],
             ],
             [
-                'user_id' => $userId,
                 'title' => 'FACTFULNESS',
                 'author' => 'ハンス・ロスリング',
                 'isbn' => '9784822289607',
@@ -118,7 +108,6 @@ class BookSeeder extends Seeder
                 'genres' => ['ビジネス', '科学'],
             ],
             [
-                'user_id' => $userId,
                 'title' => 'コンテナ物語',
                 'author' => 'マルク・レビンソン',
                 'isbn' => '9784822251468',
@@ -131,7 +120,7 @@ class BookSeeder extends Seeder
 
         foreach ($items as $item) {
             $bookData = [
-                'user_id' => $item['user_id'],
+                'user_id' => $users->random()->id,
                 'title' => $item['title'],
                 'author' => $item['author'],
                 'isbn' => $item['isbn'],
