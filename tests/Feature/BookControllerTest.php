@@ -12,6 +12,13 @@ class BookControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_トップページにアクセスすると書籍一覧画面へリダイレクトされる(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertRedirect(route('books.index'));
+    }
+
     public function test_すべてのユーザーに書籍一覧画面が表示される(): void
     {
         $response = $this->get(route('books.index'));
@@ -100,7 +107,7 @@ class BookControllerTest extends TestCase
             'title' => 'テスト書籍',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
@@ -146,7 +153,7 @@ class BookControllerTest extends TestCase
             'title' => '更新テスト',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
