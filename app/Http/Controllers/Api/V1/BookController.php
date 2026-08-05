@@ -8,8 +8,8 @@ use App\Http\Requests\Api\V1\StoreBookRequest;
 use App\Http\Requests\Api\V1\UpdateBookRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class BookController extends Controller
@@ -48,9 +48,8 @@ class BookController extends Controller
      */
     public function store(StoreBookRequest $request): JsonResponse
     {
-        $user = User::first();
         $validated = $request->validated();
-        $validated['user_id'] = $user->id;
+        $validated['user_id'] = $request->user()->id;
         $genreIds = $validated['genres'];
         unset($validated['genres']);
 
@@ -79,8 +78,14 @@ class BookController extends Controller
     /**
      * 書籍更新API
      */
-    public function update(UpdateBookRequest $request, Book $book): BookResource
+    public function update(UpdateBookRequest $request, Book $book): BookResource|JsonResponse
     {
+        if ($request->user()->cannot('update', $book)) {
+            return response()->json([
+                'error' => 'この操作を実行する権限がありません。',
+            ], 403);
+        }
+
         $validated = $request->validated();
         $genreIds = $validated['genres'];
         unset($validated['genres']);
@@ -95,8 +100,14 @@ class BookController extends Controller
     /**
      * 書籍削除API
      */
-    public function destroy(Book $book): JsonResponse
+    public function destroy(Request $request, Book $book): JsonResponse
     {
+        if ($request->user()->cannot('delete', $book)) {
+            return response()->json([
+                'error' => 'この操作を実行する権限がありません。',
+            ], 403);
+        }
+
         $book->delete();
 
         return response()->json(null, 204);
