@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Book;
 use App\Models\Genre;
+use App\Models\ReadingPlan;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,5 +55,14 @@ class BookTest extends TestCase
 
         $this->assertCount(2, $book->favoritedByUsers);
         $this->assertTrue($book->favoritedByUsers->pluck('id')->contains($users->first()->id));
+    }
+
+    public function test_book_has_many_reading_plans(): void
+    {
+        $book = Book::factory()->create();
+        ReadingPlan::factory()->count(2)->for($book)->create();
+
+        $this->assertCount(2, $book->fresh()->readingPlans);
+        $this->assertInstanceOf(ReadingPlan::class, $book->readingPlans->first());
     }
 }
