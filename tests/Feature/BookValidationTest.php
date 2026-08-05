@@ -53,7 +53,7 @@ class BookValidationTest extends TestCase
             'title' => str_repeat('あ', 255),
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
@@ -118,7 +118,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => str_repeat('あ', 255),
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
@@ -142,7 +142,7 @@ class BookValidationTest extends TestCase
         $response->assertSessionHasErrors('author');
     }
 
-    public function test_登録時_isb_nが空だとバリデーションエラーになる(): void
+    public function test_登録時_isb_nが空でも書籍が登録できる(): void
     {
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
@@ -157,7 +157,18 @@ class BookValidationTest extends TestCase
             'genres' => $genres->pluck('id')->all(),
         ]);
 
-        $response->assertSessionHasErrors('isbn');
+        $book = Book::where('title', 'テスト書籍')->firstOrFail();
+
+        $response->assertRedirect(route('books.show', $book));
+        $this->assertDatabaseHas('books', [
+            'user_id' => $user->id,
+            'title' => 'テスト書籍',
+            'author' => '鈴木一郎',
+            'isbn' => null,
+            'published_date' => '2000-01-01 00:00:00',
+            'description' => 'テストです',
+            'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
+        ]);
     }
 
     public function test_登録時_isb_nが12桁だとバリデーションエラーになる(): void
@@ -217,7 +228,7 @@ class BookValidationTest extends TestCase
         $response->assertSessionHasErrors('isbn');
     }
 
-    public function test_登録時出版日が空だとバリデーションエラーになる(): void
+    public function test_登録時出版日が空でも書籍が登録できる(): void
     {
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
@@ -232,7 +243,18 @@ class BookValidationTest extends TestCase
             'genres' => $genres->pluck('id')->all(),
         ]);
 
-        $response->assertSessionHasErrors('published_date');
+        $book = Book::where('isbn', '9781234567891')->firstOrFail();
+
+        $response->assertRedirect(route('books.show', $book));
+        $this->assertDatabaseHas('books', [
+            'user_id' => $user->id,
+            'title' => 'テスト書籍',
+            'author' => '鈴木一郎',
+            'isbn' => '9781234567891',
+            'published_date' => null,
+            'description' => 'テストです',
+            'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
+        ]);
     }
 
     public function test_登録時出版日が無効な日付だとバリデーションエラーになる(): void
@@ -276,7 +298,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => null,
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
@@ -305,7 +327,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => null,
         ]);
@@ -359,7 +381,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => $this->createUrl(255),
         ]);
@@ -491,7 +513,7 @@ class BookValidationTest extends TestCase
             'title' => str_repeat('あ', 255),
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
@@ -581,7 +603,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => str_repeat('あ', 255),
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
@@ -614,7 +636,7 @@ class BookValidationTest extends TestCase
         $response->assertSessionHasErrors('author');
     }
 
-    public function test_更新時_isb_nが空だとバリデーションエラーになる(): void
+    public function test_更新時_isb_nが空でも書籍を更新できる(): void
     {
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
@@ -638,7 +660,17 @@ class BookValidationTest extends TestCase
             'genres' => $genres->pluck('id')->all(),
         ]);
 
-        $response->assertSessionHasErrors('isbn');
+        $response->assertRedirect(route('books.show', $book));
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'user_id' => $user->id,
+            'title' => '更新テスト書籍',
+            'author' => '鈴木一郎',
+            'isbn' => null,
+            'published_date' => '2000-01-01 00:00:00',
+            'description' => 'テストです',
+            'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
+        ]);
     }
 
     public function test_更新時_isb_nが12桁だとバリデーションエラーになる(): void
@@ -731,7 +763,7 @@ class BookValidationTest extends TestCase
         $response->assertSessionHasErrors('isbn');
     }
 
-    public function test_更新時出版日が空だとバリデーションエラーになる(): void
+    public function test_更新時出版日が空でも書籍を更新できる(): void
     {
         $user = User::factory()->create();
         $genres = Genre::factory()->count(2)->create();
@@ -755,7 +787,17 @@ class BookValidationTest extends TestCase
             'genres' => $genres->pluck('id')->all(),
         ]);
 
-        $response->assertSessionHasErrors('published_date');
+        $response->assertRedirect(route('books.show', $book));
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'user_id' => $user->id,
+            'title' => '更新テスト書籍',
+            'author' => '鈴木一郎',
+            'isbn' => '9781234567891',
+            'published_date' => null,
+            'description' => 'テストです',
+            'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
+        ]);
     }
 
     public function test_更新時出版日が無効な日付だとバリデーションエラーになる(): void
@@ -815,7 +857,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => null,
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
@@ -851,7 +893,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => null,
         ]);
@@ -914,7 +956,7 @@ class BookValidationTest extends TestCase
             'title' => 'テスト書籍',
             'author' => '鈴木一郎',
             'isbn' => '9781234567891',
-            'published_date' => '2000-01-01',
+            'published_date' => '2000-01-01 00:00:00',
             'description' => 'テストです',
             'image_url' => $this->createUrl(255),
         ]);
