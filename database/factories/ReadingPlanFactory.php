@@ -25,7 +25,7 @@ class ReadingPlanFactory extends Factory
             'user_id' => User::factory(),
             'book_id' => Book::factory(),
             'target_date' => Carbon::today()->addDays(7),
-            'status' => ReadingPlanStatus::IN_PROGRESS,
+            'status' => ReadingPlanStatus::InProgress,
             'completed_at' => null,
         ];
     }
