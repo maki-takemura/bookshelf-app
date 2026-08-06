@@ -3,7 +3,10 @@
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\ReadingPlanController;
+use App\Http\Controllers\ReadingReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReviewLikeController;
 use Illuminate\Support\Facades\Route;
@@ -23,14 +26,27 @@ Route::middleware('auth')->group(function () {
     Route::resource('genres', GenreController::class);
     Route::resource('books', BookController::class)
         ->except(['index', 'show']);
+    Route::get('/books/isbn/{isbn}', [BookController::class, 'searchByIsbn']);
     Route::resource('reviews', ReviewController::class)
         ->except(['index', 'show', 'create', 'store']);
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{review}/like', [ReviewLikeController::class, 'like'])->name('reviews.like');
     Route::post('/books/{book}/favorites', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    Route::get('/reports', [ReadingReportController::class, 'index'])
+        ->name('reports.index');
+    Route::resource('reading-plans', ReadingPlanController::class)
+        ->except(['show'])
+        ->parameters(['reading-plans' => 'plan']);
+    Route::post('/reading-plans/{plan}/complete', [ReadingPlanController::class, 'complete'])
+        ->name('reading-plans.complete');
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])
+        ->name('notifications.read');
 });
 
-Route::get('/', [BookController::class, 'index'])->name('books.index');
+Route::redirect('/', '/books');
+Route::get('/books', [BookController::class, 'index'])->name('books.index');
 Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
 Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
