@@ -11,6 +11,7 @@ use App\Models\Genre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
@@ -132,9 +133,12 @@ class BookController extends Controller
         $genreIds = $validated['genres'];
         unset($validated['genres']);
 
-        $book = Auth::user()->books()->create($validated);
+        $book = DB::transaction(function () use ($validated, $genreIds) {
+            $book = Auth::user()->books()->create($validated);
+            $book->genres()->attach($genreIds);
 
-        $book->genres()->attach($genreIds);
+            return $book;
+        });
 
         return redirect()->route('books.show', $book)
             ->with('success', '書籍を登録しました。');
@@ -179,8 +183,10 @@ class BookController extends Controller
         $genreIds = $validated['genres'];
         unset($validated['genres']);
 
-        $book->update($validated);
-        $book->genres()->sync($genreIds);
+        DB::transaction(function () use ($book, $validated, $genreIds): void {
+            $book->update($validated);
+            $book->genres()->sync($genreIds);
+        });
 
         return redirect()->route('books.show', $book)
             ->with('success', '書籍情報を更新しました。');

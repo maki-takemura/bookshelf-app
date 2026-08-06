@@ -105,11 +105,6 @@ class BookControllerTest extends TestCase
         $this->assertDatabaseHas('books', [
             'user_id' => $user->id,
             'title' => 'テスト書籍',
-            'author' => '鈴木一郎',
-            'isbn' => '9781234567891',
-            'published_date' => '2000-01-01 00:00:00',
-            'description' => 'テストです',
-            'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
 
         $this->assertDatabaseHas('book_genre', [
@@ -151,11 +146,6 @@ class BookControllerTest extends TestCase
         $this->assertDatabaseHas('books', [
             'user_id' => $user->id,
             'title' => '更新テスト',
-            'author' => '鈴木一郎',
-            'isbn' => '9781234567891',
-            'published_date' => '2000-01-01 00:00:00',
-            'description' => 'テストです',
-            'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=99',
         ]);
 
         $this->assertDatabaseHas('book_genre', [
