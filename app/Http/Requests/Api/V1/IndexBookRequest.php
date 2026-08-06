@@ -32,8 +32,8 @@ class IndexBookRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'keyword.max' => '検索キーワードは255文字以内で入力してください',
-            'genre_id.exists' => '選択されたジャンルが存在しません',
+            'keyword.max' => '検索キーワードは255文字以内で入力してください。',
+            'genre_id.exists' => '選択されたジャンルが存在しません。',
         ];
     }
 }

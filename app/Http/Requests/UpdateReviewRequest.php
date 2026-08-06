@@ -31,9 +31,9 @@ class UpdateReviewRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'rating.required' => '評価を選択してください',
-            'comment.required' => 'コメントを入力してください',
-            'comment.max' => 'コメントは1000文字以内で入力してください',
+            'rating.required' => '評価を選択してください。',
+            'comment.required' => 'コメントを入力してください。',
+            'comment.max' => 'コメントは1000文字以内で入力してください。',
         ];
     }
 }

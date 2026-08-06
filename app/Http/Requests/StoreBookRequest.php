@@ -37,17 +37,17 @@ class StoreBookRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'タイトルを入力してください',
-            'title.max' => 'タイトルは255文字以内で入力してください',
-            'author.required' => '著者名を入力してください',
-            'author.max' => '著者名は255文字以内で入力してください',
-            'isbn.size' => 'ISBNは13桁で入力してください',
-            'isbn.unique' => 'このISBNは既に登録されています',
-            'published_date.date' => '出版日は有効な日付を入力してください',
-            'image_url.url' => '画像URLは正しいURLを入力してください',
-            'image_url.max' => '画像URLは255文字以内で入力してください',
-            'genres.required' => 'ジャンルは一つ以上選択してください',
-            'genres.*.exists' => '選択されたジャンルが存在しません',
+            'title.required' => 'タイトルを入力してください。',
+            'title.max' => 'タイトルは255文字以内で入力してください。',
+            'author.required' => '著者名を入力してください。',
+            'author.max' => '著者名は255文字以内で入力してください。',
+            'isbn.size' => 'ISBNは13桁で入力してください。',
+            'isbn.unique' => 'このISBNは既に登録されています。',
+            'published_date.date' => '出版日は有効な日付を入力してください。',
+            'image_url.url' => '画像URLは正しいURLを入力してください。',
+            'image_url.max' => '画像URLは255文字以内で入力してください。',
+            'genres.required' => 'ジャンルは一つ以上選択してください。',
+            'genres.*.exists' => '選択されたジャンルが存在しません。',
         ];
     }
 }
