@@ -61,12 +61,12 @@ class ReadingPlanController extends Controller
     /**
      * 読書計画編集画面を表示
      */
-    public function edit(ReadingPlan $plan): View|RedirectResponse
+    public function edit(ReadingPlan $plan): View
     {
         $this->authorize('update', $plan);
 
         if ($plan->status === ReadingPlanStatus::Completed) {
-            return redirect()->route('reading-plans.index');
+            abort(403);
         }
 
         return view('reading-plans.edit', ['readingPlan' => $plan]);
@@ -80,11 +80,12 @@ class ReadingPlanController extends Controller
         $this->authorize('update', $plan);
 
         if ($plan->status === ReadingPlanStatus::Completed) {
-            return redirect()->route('reading-plans.index');
+            abort(403);
         }
 
         $plan->update([
             'target_date' => $request->validated('target_date'),
+            'status' => ReadingPlanStatus::InProgress,
         ]);
 
         return redirect()
@@ -114,7 +115,7 @@ class ReadingPlanController extends Controller
         $this->authorize('update', $plan);
 
         if ($plan->status === ReadingPlanStatus::Completed) {
-            return redirect()->route('reading-plans.index');
+            abort(403);
         }
 
         $plan->update([

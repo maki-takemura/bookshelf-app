@@ -33,7 +33,7 @@ class ReadingPlanTest extends TestCase
     public function test_status_is_cast_to_enum(): void
     {
         $readingPlan = ReadingPlan::factory()->create([
-            'status' => ReadingPlanStatus::IN_PROGRESS,
+            'status' => ReadingPlanStatus::InProgress,
         ]);
 
         $this->assertInstanceOf(

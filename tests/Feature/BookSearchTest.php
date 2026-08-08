@@ -272,7 +272,7 @@ class BookSearchTest extends TestCase
             ]));
 
         $response->assertRedirect(route('books.index'));
-        $response->assertSessionHasErrors('keyword');
+        $response->assertSessionHas('error', '検索キーワードは255文字以内で入力してください。');
     }
 
     public function test_存在しないジャンル_i_dならバリデーションエラーになる(): void
@@ -283,6 +283,6 @@ class BookSearchTest extends TestCase
             ]));
 
         $response->assertRedirect(route('books.index'));
-        $response->assertSessionHasErrors('genre');
+        $response->assertSessionHas('error', '選択されたジャンルが存在しません。');
     }
 }

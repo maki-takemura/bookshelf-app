@@ -122,7 +122,7 @@ class ReadingPlanTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('reading-plans.edit', $readingPlan));
 
-        $response->assertRedirect(route('reading-plans.index'));
+        $response->assertForbidden();
     }
 
     public function test_認証済みユーザーでも他のユーザーの読書計画編集画面は表示できない(): void
@@ -196,9 +196,26 @@ class ReadingPlanTest extends TestCase
         $response->assertRedirect(route('reading-plans.index'));
         $response->assertSessionHas('success', '読書計画を更新しました。');
         $readingPlan->refresh();
-        $this->assertTrue(
-            $readingPlan->target_date->isSameDay(now()->addWeeks(2))
-        );
+        $this->assertTrue($readingPlan->target_date->isSameDay(now()->addWeeks(2)));
+    }
+
+    public function test_期限切れの読書計画を更新するとステータスが進行中に変更される(): void
+    {
+        $user = User::factory()->create();
+        $readingPlan = ReadingPlan::factory()->create([
+            'user_id' => $user->id,
+            'status' => ReadingPlanStatus::Expired,
+        ]);
+
+        $response = $this->actingAs($user)->put(route('reading-plans.update', $readingPlan), [
+            'target_date' => now()->addWeek()->toDateString(),
+        ]);
+
+        $response->assertRedirect(route('reading-plans.index'));
+        $this->assertDatabaseHas('reading_plans', [
+            'id' => $readingPlan->id,
+            'status' => ReadingPlanStatus::InProgress->value,
+        ]);
     }
 
     public function test_認証済みユーザーでも読了済みの読書計画は更新できない(): void
@@ -214,11 +231,9 @@ class ReadingPlanTest extends TestCase
             'target_date' => now()->addWeeks(2)->toDateString(),
         ]);
 
-        $response->assertRedirect(route('reading-plans.index'));
+        $response->assertForbidden();
         $readingPlan->refresh();
-        $this->assertTrue(
-            $readingPlan->target_date->isSameDay($originalTargetDate)
-        );
+        $this->assertTrue($readingPlan->target_date->isSameDay($originalTargetDate));
     }
 
     public function test_認証済みユーザーでも他のユーザーの読書計画は更新できない(): void
@@ -237,9 +252,7 @@ class ReadingPlanTest extends TestCase
 
         $response->assertForbidden();
         $readingPlan->refresh();
-        $this->assertTrue(
-            $readingPlan->target_date->isSameDay($originalTargetDate)
-        );
+        $this->assertTrue($readingPlan->target_date->isSameDay($originalTargetDate));
     }
 
     public function test_認証済みユーザーは自身の読書計画を削除できる(): void
@@ -325,7 +338,7 @@ class ReadingPlanTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('reading-plans.complete', $readingPlan));
 
-        $response->assertRedirect(route('reading-plans.index'));
+        $response->assertForbidden();
         $readingPlan->refresh();
         $this->assertEquals(
             $originalUpdatedAt,
@@ -359,9 +372,7 @@ class ReadingPlanTest extends TestCase
 
         $response->assertRedirect(route('login'));
         $readingPlan->refresh();
-        $this->assertTrue(
-            $readingPlan->target_date->isSameDay($originalTargetDate)
-        );
+        $this->assertTrue($readingPlan->target_date->isSameDay($originalTargetDate));
     }
 
     public function test_未認証ユーザーは読書計画を削除できない(): void
